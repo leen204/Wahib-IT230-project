@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="en" dir="ltr"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Blood Request | Wahib</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+</head><body onload="guard('hospital')">
+<header class="w-header"></header>
+
+<section class="container">
+  <h2>Add Blood Request</h2>
+  <div class="panel" style="max-width:640px;margin:auto">
+    <form id="f">
+      <label>Blood Type</label>
+      <select id="blood" required>
+        <option value="">Select...</option><option>O-</option><option>O+</option><option>A-</option><option>A+</option>
+        <option>B-</option><option>B+</option><option>AB-</option><option>AB+</option>
+      </select>
+      <label>Quantity (bags)</label><input id="qty" type="number" min="1" placeholder="e.g., 3" required>
+      <label>Status</label><select id="status"><option>Open</option><option>Emergency</option></select>
+      <label>City</label><input id="city" placeholder="Riyadh" required>
+      <label>Location / Branch</label><input id="loc" placeholder="Main Campus / full address" required>
+      <button class="w-btn" type="submit">Save Request</button>
+    </form>
+  </div>
+</section>
+
+<footer class="w-footer"></footer>
+<div id="w-toast"></div>
+<div id="w-confirm"><div class="box">
+  <h3 id="w-confirm-title">Confirm</h3><p id="w-confirm-msg">Are you sure?</p>
+  <div class="actions"><button class="w-btn secondary" id="w-cancel">Cancel</button><button class="w-btn" id="w-ok">Yes</button></div>
+</div></div>
+<script src="app.js"></script>
+<script src="ui.js"></script>
+<script src="footer.js"></script>
+
+<script>
+document.getElementById('f').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const errs=[];
+  if(!blood.value) errs.push('Select blood type');
+  if(!(+qty.value>0)) errs.push('Quantity must be > 0');
+  if(!city.value.trim()) errs.push('City is required');
+  if(!loc.value.trim()) errs.push('Location is required');
+  if(errs.length){ toast(errs[0],'err'); return; }
+
+  const ok=await confirmBox('Publish this blood request?', 'Publish');
+  if(!ok) return;
+  const H=getAcc().hospitalName||'Hospital';
+  addRequest({hospital:H,city:city.value.trim(),location:loc.value.trim(),blood:blood.value,quantity:+qty.value,status:status.value});
+  toast('Request saved successfully.');
+  setTimeout(()=> location.href='hospital_dashboard.html', 800);
+});
+</script>
+</body></html>

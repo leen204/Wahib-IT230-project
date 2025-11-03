@@ -1,0 +1,44 @@
+<!DOCTYPE html><html lang="en" dir="ltr"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit Appointment | Wahib</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+</head><body onload="guard('donor')">
+<header class="w-header"></header>
+
+<section class="container">
+  <h2>Edit Appointment</h2>
+  <div class="panel" style="max-width:600px;margin:auto">
+    <form id="f"></form>
+  </div>
+</section>
+
+<footer class="w-footer"></footer>
+<div id="w-toast"></div>
+<div id="w-confirm"><div class="box">
+  <h3 id="w-confirm-title">Confirm</h3><p id="w-confirm-msg">Are you sure?</p>
+  <div class="actions"><button class="w-btn secondary" id="w-cancel">Cancel</button><button class="w-btn" id="w-ok">Yes</button></div>
+</div></div>
+<script src="app.js"></script>
+<script src="ui.js"></script>
+<script src="footer.js"></script>
+
+<script>
+const appts=getAppts(); const a=appts[0];
+if(!a){ location.href='donor_home.html'; }
+document.getElementById('f').innerHTML=`
+  <label>Hospital</label><input value="${a.hospital}" readonly>
+  <label>Blood Type</label><input value="${a.blood}" readonly>
+  <label>Date</label><input id="d" type="date" value="${a.date}">
+  <label>Time</label><input id="t" type="time" value="${a.time}">
+  <button class="w-btn" type="submit">Save Changes</button>`;
+document.getElementById('f').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const ok=await confirmBox('Save changes to this appointment?', 'Save Changes');
+  if(!ok) return;
+  updateAppointment(a.id,{date:d.value,time:t.value});
+  toast('Appointment updated successfully.');
+  setTimeout(()=> location.href='donor_home.html', 900);
+});
+</script>
+</body></html>

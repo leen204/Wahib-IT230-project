@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profile | Donor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="base.css">
+</head>
+<body onload="guard('donor')">
+  <header class="w-header"></header>
+
+  <section class="container">
+    <h2>My Profile</h2>
+    <div class="panel" id="box"></div>
+  </section>
+
+  <footer class="w-footer"></footer>
+
+  <!-- Toast + Confirm -->
+  <div id="w-toast"></div>
+  <div id="w-confirm"><div class="box">
+    <h3 id="w-confirm-title">Confirm</h3><p id="w-confirm-msg">Are you sure?</p>
+    <div class="actions">
+      <button class="w-btn secondary" id="w-cancel">Cancel</button>
+      <button class="w-btn" id="w-ok">Yes</button>
+    </div>
+  </div></div>
+
+  <script src="app.js"></script>
+  <script src="ui.js"></script>
+  <script src="footer.js"></script>
+
+  <script>
+    /* ==== Safety getters in case app.js names differ ==== */
+    const _getAcc = (window.getAcc || function(){
+      return JSON.parse(localStorage.getItem('wahib_account') || '{}');
+    });
+    const _setAcc = (window.setAcc || function(obj){
+      localStorage.setItem('wahib_account', JSON.stringify(obj || {}));
+    });
+    const _getHistory = (window.getHistory || function(){
+      return JSON.parse(localStorage.getItem('wahib_history') || '[]');
+    });
+
+    function render(){
+      const me = _getAcc() || {};
+      const hist = _getHistory();
+
+      const historyRows = (hist && hist.length)
+        ? hist.map(h => `
+            <tr>
+              <td>${h.date}</td>
+              <td>${h.hospital}</td>
+              <td>${h.city}</td>
+              <td><b>${h.blood}</b></td>
+              <td style="display:flex;gap:8px;flex-wrap:wrap">
+                ${h.cert
+                  ? `<a class="w-btn ghost" href="${h.cert}" target="_blank">View</a>
+                     <a class="w-btn secondary" href="${h.cert}" download>Download</a>`
+                  : `<span class="muted">—</span>`
+                }
+              </td>
+            </tr>
+          `).join('')
+        : `<tr><td colspan="5" class="muted">No past donations yet.</td></tr>`;
+
+      document.getElementById('box').innerHTML = `
+        <div style="display:grid;gap:12px;grid-template-columns:1fr 1fr">
+          <div class="panel" style="border:1px solid #eee">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <h3 style="margin:0 0 8px">Account</h3>
+              <button class="w-btn ghost" onclick="openEdit()">Edit</button>
+            </div>
+            <div><b>Name:</b> ${me.name || '-'}</div>
+            <div><b>Email:</b> ${me.email || '-'}</div>
+            <div><b>Blood Type:</b> ${me.blood || '-'}</div>
+            <div><b>Phone:</b> ${me.phone || '-'}</div>
+            <div><b>City / Location:</b> ${me.city || me.location || '-'}</div>
+          </div>
+
+          <div class="panel" style="border:1px solid #eee">
+            <h3 style="margin:0 0 8px">Eligibility Test</h3>
+            <div class="muted">Status: <b>${getEligible() ? 'Eligible ✅' : 'Not completed ⚠️'}</b></div>
+            <a href="eligibility_test.html" class="w-btn" style="margin-top:10px;text-decoration:none;text-align:center">Take Eligibility Test</a>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:12px">
+          <h3 style="margin:0 0 8px">Donation History</h3>
+          <table class="table">
+            <thead>
+              <tr><th>Date</th><th>Hospital</th><th>City</th><th>Blood</th><th>Certificate</th></tr>
+            </thead>
+            <tbody>${historyRows}</tbody>
+          </table>
+        </div>
+
+        <div style="margin-top:12px">
+          <button class="w-btn secondary" onclick="logout()">Logout</button>
+        </div>
+      `;
+    }
+
+    /* ==== Edit Profile Modal ==== */
+    function openEdit(){
+      const me = _getAcc() || {};
+      const html = `
+        <div class="panel" style="max-width:560px;margin:0 auto">
+          <h3 style="margin:0 0 10px">Edit Profile</h3>
+          <form id="editForm" style="display:grid;gap:10px">
+            <label>Name</label><input id="eName" value="${me.name||''}">
+            <label>Email</label><input id="eEmail" type="email" value="${me.email||''}">
+            <label>Blood Type</label>
+            <select id="eBlood">
+              ${['O+','O-','A+','A-','B+','B-','AB+','AB-'].map(bt=>`<option ${bt===(me.blood||'')?'selected':''}>${bt}</option>`).join('')}
+            </select>
+            <label>Phone</label><input id="ePhone" value="${me.phone||''}">
+            <label>City / Location</label><input id="eCity" value="${me.city || me.location || ''}">
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px">
+              <button type="button" class="w-btn secondary" onclick="closeEdit()">Cancel</button>
+              <button type="submit" class="w-btn">Save</button>
+            </div>
+          </form>
+        </div>
+      `;
+      document.getElementById('w-confirm-title').textContent = 'Edit Profile';
+      document.getElementById('w-confirm-msg').innerHTML = html;
+      document.getElementById('w-ok').style.display='none';
+      document.getElementById('w-cancel').textContent='Close';
+      document.getElementById('w-confirm').style.display='flex';
+
+      document.getElementById('editForm').addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        const ok = await confirmBox('Save profile changes?', 'Confirm Save');
+        if(!ok) return;
+        const updated = Object.assign({}, _getAcc(), {
+          name:  document.getElementById('eName').value.trim(),
+          email: document.getElementById('eEmail').value.trim(),
+          blood: document.getElementById('eBlood').value,
+          phone: document.getElementById('ePhone').value.trim(),
+          city:  document.getElementById('eCity').value.trim(),
+          location: document.getElementById('eCity').value.trim()
+        });
+        _setAcc(updated);
+        toast('Profile saved.');
+        closeEdit();
+        render();
+      });
+    }
+
+    function closeEdit(){
+      document.getElementById('w-ok').style.display='';
+      document.getElementById('w-confirm').style.display='none';
+    }
+
+    // 🩸 Fake donation data
+    localStorage.setItem('wahib_history', JSON.stringify([
+      { date:'2024-03-12', hospital:'King Khalid Hospital', city:'Riyadh', blood:'A-', cert:'certificates/kkh.pdf' },
+      { date:'2023-11-02', hospital:'King Fahad Medical City', city:'Riyadh', blood:'A-', cert:'certificates/kfmc.pdf' },
+      { date:'2022-07-20', hospital:'Riyadh Central Hospital', city:'Riyadh', blood:'A-', cert:'certificates/rc.pdf' }
+    ]));
+
+    render();
+  </script>
+</body>
+</html>
