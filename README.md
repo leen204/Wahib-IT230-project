@@ -1,7 +1,9 @@
 # 🌐 Wahib Platform
 
+<p align="center">
+<img width="1539" height="291" alt="image" src="https://github.com/user-attachments/assets/8efd5522-f323-4389-b512-56dfdc0be14d" />
 
-
+</p>
 
 ---
 
