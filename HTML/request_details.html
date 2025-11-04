@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Request Details | Wahib</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="base.css">
+  <style>
+    .meta {display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr))}
+    .kv {background:#fafafa;border:1px solid #eee;border-radius:12px;padding:10px}
+    .kv .k {font-size:12px;color:#777;margin-bottom:4px}
+    .kv .v {font-weight:800}
+    .cols {display:grid;gap:14px;grid-template-columns:2fr 1.1fr}
+    @media (max-width:900px){ .cols{grid-template-columns:1fr} .meta{grid-template-columns:1fr 1fr} }
+    .hint{color:#666}
+    .badge{display:inline-flex;align-items:center;gap:6px;background:#f5f5f5;border:1px solid #eee;padding:6px 10px;border-radius:999px;font-weight:700}
+    .ok{background:#e7f6e7;border-color:#c7ebc7;color:#137b13}
+    .warn{background:#fdecec;border-color:#f4c6c6;color:#b91c1c}
+  </style>
+</head>
+<body onload="guard('donor')">
+<header class="w-header"></header>
+
+<section class="container">
+  <h2>Request Details</h2>
+  <div id="box" class="panel"></div>
+</section>
+
+<footer class="w-footer"></footer>
+
+<div id="w-toast"></div>
+<div id="w-confirm"><div class="box">
+  <h3 id="w-confirm-title">Confirm</h3><p id="w-confirm-msg">Are you sure?</p>
+  <div class="actions"><button class="w-btn secondary" id="w-cancel">Cancel</button><button class="w-btn" id="w-ok">Yes</button></div>
+</div></div>
+
+<script src="app.js"></script>
+<script src="ui.js"></script>
+<script src="footer.js"></script>
+<script>
+  // ==== Safe getters (لو تغيّرت أسماء الدوال في app.js) ====
+  const _getAcc = (window.getAcc || function(){return JSON.parse(localStorage.getItem('wahib_account')||'{}')});
+  const _getReq  = (window.getSelectedReq || function(){
+    try{ return JSON.parse(localStorage.getItem((window.LS&&LS.selectedReq)||'wahib_selected_request')||'null'); }
+    catch(e){ return null; }
+  });
+
+  const req = _getReq();
+  if(!req){ location.href = 'donor_home.html'; }
+
+  // Helpers
+  const me = _getAcc() || {};
+  const mapUrl = (req.city||req.location) ? ('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(`${req.city||''} ${req.location||''}`)) : '#';
+
+  function donorCanDonate(donor, needed){
+    // توافق مبسّط (المتبرع -> الجهات الممكن التبرع لها)
+    const canTo = {
+      'O-':['O-','O+','A-','A+','B-','B+','AB-','AB+'],
+      'O+':['O+','A+','B+','AB+'],
+      'A-':['A-','A+','AB-','AB+'],
+      'A+':['A+','AB+'],
+      'B-':['B-','B+','AB-','AB+'],
+      'B+':['B+','AB+'],
+      'AB-':['AB-','AB+'],
+      'AB+':['AB+']
+    };
+    const list = canTo[(donor||'').toUpperCase()] || [];
+    return list.includes((needed||'').toUpperCase());
+  }
+
+  function compatLine(needed){
+    // الجهات التي يمكنها التبرع لهذا "المطلوب" (المستقبل)
+    const from = {
+      'O-':['O-'],
+      'O+':['O-','O+'],
+      'A-':['O-','A-'],
+      'A+':['O-','O+','A-','A+'],
+      'B-':['O-','B-'],
+      'B+':['O-','O+','B-','B+'],
+      'AB-':['O-','A-','B-','AB-'],
+      'AB+':['O-','O+','A-','A+','B-','B+','AB-','AB+']
+    };
+    const arr = from[(needed||'').toUpperCase()] || [];
+    return arr.join(', ');
+  }
+
+  // Seed fallback fields (لو ناقص شيء)
+  const data = Object.assign({
+    id: req.id || Math.floor(Math.random()*9000)+1000,
+    hospital: req.hospital || 'Hospital',
+    city: req.city || 'Riyadh',
+    location: req.location || 'Main Campus',
+    blood: req.blood || 'O+',
+    quantity: req.quantity || 3,
+    status: (req.status||'Open'),
+    postedAt: req.postedAt || '2025-10-28',
+    neededBy: req.neededBy || '2025-11-20',
+    phone: req.contact || '+966 11 000 0000',
+    email: req.email || 'hospital@example.com',
+    notes: req.notes || 'Please arrive 10 minutes early. Bring your ID.'
+  }, req);
+
+  const match = donorCanDonate(me.blood, data.blood);
+  const compatMsg = match
+     ? `<span class="badge ok">You can donate • Your blood ${me.blood||'-'}</span>`
+     : `<span class="badge warn">Your blood (${me.blood||'-'}) is not compatible for ${data.blood}</span>`;
+
+  const compatForNeeded = compatLine(data.blood);
+
+  // صُنْع واجهة التفاصيل
+  document.getElementById('box').innerHTML = `
+    <div class="cols">
+      <!-- LEFT: Details -->
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+          <div>
+            <div style="font-weight:800;font-size:20px">${data.hospital}</div>
+            <div class="muted">${data.city} • ${data.location}</div>
+          </div>
+          <div>
+            ${(data.status||'Open').toLowerCase()==='emergency'
+               ? '<span class="tag emg">Emergency</span>'
+               : '<span class="tag open">Open</span>'}
+          </div>
+        </div>
+
+        <div class="meta" style="margin-top:12px">
+          <div class="kv"><div class="k">Request ID</div><div class="v">#${data.id}</div></div>
+          <div class="kv"><div class="k">Blood Needed</div><div class="v">${data.blood}</div></div>
+          <div class="kv"><div class="k">Quantity</div><div class="v">${data.quantity} bags</div></div>
+          <div class="kv"><div class="k">Posted</div><div class="v">${data.postedAt}</div></div>
+          <div class="kv"><div class="k">Needed by</div><div class="v">${data.neededBy}</div></div>
+          <div class="kv"><div class="k">Compatibility</div><div class="v">${compatForNeeded || '-'}</div></div>
+        </div>
+
+        <div style="margin-top:12px">${compatMsg}</div>
+
+        <div class="panel" style="margin-top:12px">
+          <h3 style="margin:0 0 8px">Quick Book</h3>
+          <div style="display:grid;gap:10px;grid-template-columns:1fr 1fr">
+            <div>
+              <label>Date</label>
+              <input id="d" type="date">
+            </div>
+            <div>
+              <label>Time</label>
+              <input id="t" type="time">
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+            <button class="w-btn" onclick="toBook()">Book</button>
+            <a class="w-btn ghost" href="book_appointment.html">Open full booking</a>
+          </div>
+          <div class="hint" style="margin-top:8px">You can only hold one active appointment at a time.</div>
+        </div>
+
+        <div class="panel" style="margin-top:12px">
+          <h3 style="margin:0 0 8px">Notes & Guidance</h3>
+          <ul style="margin:0 0 0 18px;line-height:1.8">
+            <li>${data.notes}</li>
+            <li>Bring your ID and drink water before donation.</li>
+            <li>Minimum age 18, weight &ge; 50kg, good health.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- RIGHT: Contact & Map -->
+      <div>
+        <div class="panel">
+          <h3 style="margin:0 0 8px">Contact</h3>
+          <div><b>Phone:</b> ${data.phone}</div>
+          <div><b>Email:</b> <a href="mailto:${data.email}">${data.email}</a></div>
+          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+            <a class="w-btn secondary" href="tel:${data.phone.replace(/\s/g,'')}">Call</a>
+            <a class="w-btn ghost" href="mailto:${data.email}">Email</a>
+            <a class="w-btn" target="_blank" href="${mapUrl}">Open Maps</a>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:12px">
+          <h3 style="margin:0 0 8px">Actions</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="w-btn secondary" onclick="location.href='donor_home.html'">Back</button>
+            <button class="w-btn" onclick="toBook()">Book</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // تعبئة سريعة لتاريخ/وقت افتراضيين (غدًا 10:00)
+  (function presetDT(){
+    try{
+      const dt = new Date();
+      dt.setDate(dt.getDate()+1);
+      const yyyy = dt.getFullYear();
+      const mm = String(dt.getMonth()+1).padStart(2,'0');
+      const dd = String(dt.getDate()).padStart(2,'0');
+      const dateStr = `${yyyy}-${mm}-${dd}`;
+      const timeStr = '10:00';
+      const dEl = document.getElementById('d');
+      const tEl = document.getElementById('t');
+      if(dEl) dEl.value = dateStr;
+      if(tEl) tEl.value = timeStr;
+    }catch(e){}
+  })();
+
+  // نفس حارس الحجز المستخدم في بقية الصفحات
+  function toBook(){
+    if(hasActiveAppt()){ toast('You already have an active appointment.','err'); return; }
+    if(!getEligible()){ toast('Complete the Eligibility Test from your profile first.','err'); return; }
+
+    // لو عبّى تاريخ/وقت هنا، نخزّنهما مؤقتًا ونكمل في صفحة الحجز
+    const dVal = (document.getElementById('d')||{}).value || '';
+    const tVal = (document.getElementById('t')||{}).value || '';
+    try{
+      const key = (window.LS && LS.selectedReq) || 'wahib_selected_request';
+      const currentSel = JSON.parse(localStorage.getItem(key) || 'null') || data;
+      currentSel.prefDate = dVal;
+      currentSel.prefTime = tVal;
+      localStorage.setItem(key, JSON.stringify(currentSel));
+    }catch(e){}
+
+    location.href='book_appointment.html';
+  }
+</script>
+</body>
+</html>
