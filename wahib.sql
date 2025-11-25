@@ -1,5 +1,3 @@
-
-
 CREATE TABLE `appointment` (
   `Appointment_ID` int(11) NOT NULL,
   `Request_ID` int(11) NOT NULL,
@@ -15,7 +13,14 @@ CREATE TABLE `appointment` (
 
 INSERT INTO `appointment` (`Appointment_ID`, `Request_ID`, `Donor_ID`, `Appointment_Date`, `Appointment_Time`, `Status`) VALUES
 (1, 1, 1, '2025-11-24', '09:30:00', 'Booked'),
-(2, 2, 2, '2025-11-25', '11:00:00', 'Booked');
+(2, 2, 2, '2025-11-25', '11:00:00', 'Booked'),
+(91, 18, 18, '2025-11-24', '10:00:00', 'Completed'),
+(92, 19, 19, '2025-11-25', '12:00:00', 'Completed'),
+(93, 20, 20, '2025-11-20', '09:00:00', 'Completed'),
+(94, 21, 21, '2025-11-26', '14:30:00', 'Booked'),
+(95, 22, 1, '2025-11-27', '11:00:00', 'Booked'),
+(96, 23, 2, '2025-11-28', '15:00:00', 'Booked'),
+(97, 18, 22, '2025-11-25', '14:00:00', 'Completed');
 
 -- --------------------------------------------------------
 
@@ -42,7 +47,13 @@ CREATE TABLE `bloodrequest` (
 
 INSERT INTO `bloodrequest` (`Request_ID`, `Hospital_ID`, `Quantity`, `Creation_Date`, `Status`, `Emergency`, `Blood_Type`, `City`, `Location`, `Needed_By`) VALUES
 (1, 1, 3, '2025-11-22', 'Open', 1, 'O+', 'Riyadh', 'Main Campus - Emergency Department', '2025-11-25'),
-(2, 2, 2, '2025-11-22', 'Closed', 0, 'A-', 'Jeddah', 'North Corniche - Blood Bank', '2025-11-27');
+(2, 2, 2, '2025-11-22', 'Closed', 0, 'A-', 'Jeddah', 'North Corniche - Blood Bank', '2025-11-27'),
+(18, 7, 4, '2025-11-22', 'Open', 1, 'A+', 'Riyadh', 'Building 2 - ER', '2025-11-30'),
+(19, 7, 2, '2025-11-23', 'Open', 0, 'O-', 'Riyadh', 'Blood Lab', '2025-12-01'),
+(20, 8, 3, '2025-11-20', 'Open', 0, 'B+', 'Dammam', 'Bank A', '2025-11-29'),
+(21, 9, 5, '2025-11-21', 'Open', 1, 'AB+', 'Medina', 'Emergency Room', '2025-11-28'),
+(22, 8, 1, '2025-11-22', 'Open', 0, 'O+', 'Dammam', 'Blood Unit 3', '2025-11-26'),
+(23, 9, 2, '2025-11-22', 'Open', 0, 'A-', 'Medina', 'South Wing', '2025-12-02');
 
 -- --------------------------------------------------------
 
@@ -69,9 +80,13 @@ CREATE TABLE `donor` (
 --
 
 INSERT INTO `donor` (`Donor_ID`, `User_Name`, `Email`, `Password`, `National_ID`, `Phone`, `Birth_Date`, `Age`, `City`, `Blood_Type`, `Last_Donation_Date`) VALUES
-(1, 'Lamis Al-Saleh', 'lamis@example.com', '123', '1234567890', '0500000000', '2003-01-01', 21, 'Riyadh', 'O+', NULL),
-(2, 'Maha Al-Harbi', 'maha@example.com', '123', '1234567891', NULL, '2002-05-15', 22, 'Jeddah', 'A-', NULL),
-(7, 'len aldbays', 'leenkd230@gmail.com', 'L123456l', '1123456780', '0505145678', NULL, 21, 'riyadh', 'O+', NULL);
+(1, 'Lamis Al-Saleh', 'lamis@example.com', '12345678', '1234567890', '0500000000', '2003-01-01', 21, 'Riyadh', 'O+', NULL),
+(2, 'Maha Al-Harbi', 'maha@example.com', '12345678', '1234567891', '0505812345', '2002-05-15', 22, 'Jeddah', 'A-', NULL),
+(18, 'Sara Al-Qahtani', 'sara@example.com', '12345678', '2234567890', '0551111111', '2000-04-12', 24, 'Riyadh', 'A+', '2025-11-24'),
+(19, 'Reem Al-Otaibi', 'reem@example.com', '12345678', '2234567891', '0552222222', '1999-10-05', 25, 'Jeddah', 'B+', '2025-11-25'),
+(20, 'Noor Al-Mutairi', 'noor@example.com', '12345678', '2234567892', '0553333333', '2001-02-20', 23, 'Dammam', 'O-', '2025-11-20'),
+(21, 'Fahad Al-Subaie', 'fahad@example.com', '12345678', '2234567893', '0554444444', '1998-01-11', 26, 'Medina', 'AB+', NULL),
+(22, 'leen aldbays', 'leenkd240@gmail.com', '12345678', '1234534590', '0505145678', '2003-06-24', 22, 'Riyadh', 'O+', '2025-11-25');
 
 -- --------------------------------------------------------
 
@@ -86,16 +101,21 @@ CREATE TABLE `eligibilitytest` (
   `Weight` decimal(5,2) DEFAULT NULL,
   `Hemoglobin_Level` decimal(4,2) DEFAULT NULL,
   `Is_Passed` tinyint(1) NOT NULL DEFAULT '0',
-  `Next_Date` date DEFAULT NULL
+  `Next_Date` date DEFAULT NULL,
+  `Infectious_Disease` enum('yes','no') NOT NULL DEFAULT 'no'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `eligibilitytest`
 --
 
-INSERT INTO `eligibilitytest` (`Test_ID`, `Donor_ID`, `Test_Date`, `Weight`, `Hemoglobin_Level`, `Is_Passed`, `Next_Date`) VALUES
-(1, 1, '2025-10-23', '55.00', '13.20', 1, '2025-12-22'),
-(2, 2, '2025-11-12', '52.50', '12.60', 1, '2026-01-11');
+INSERT INTO `eligibilitytest` (`Test_ID`, `Donor_ID`, `Test_Date`, `Weight`, `Hemoglobin_Level`, `Is_Passed`, `Next_Date`, `Infectious_Disease`) VALUES
+(1, 1, '2025-10-23', '55.00', '13.20', 1, '2025-12-22', 'no'),
+(2, 2, '2025-11-12', '52.50', '12.60', 1, '2026-01-11', 'no'),
+(34, 18, '2025-11-25', '50.00', '23.00', 1, '2026-01-25', 'no'),
+(35, 20, '2025-11-25', '67.00', '34.00', 1, '2026-01-25', 'no'),
+(36, 19, '2025-11-25', '56.00', '14.00', 1, '2026-01-25', 'no'),
+(37, 22, '2025-11-25', '56.00', '14.00', 1, '2026-01-25', 'no');
 
 -- --------------------------------------------------------
 
@@ -118,8 +138,11 @@ CREATE TABLE `hospital` (
 --
 
 INSERT INTO `hospital` (`Hospital_ID`, `Hospital_Name`, `Email`, `Password`, `Phone`, `City`, `Location`) VALUES
-(1, 'Riyadh Central Hospital', 'rch@example.com', '123', '0110000000', 'Riyadh', 'Main Campus - King Fahd Rd'),
-(2, 'Jeddah North Hospital', 'jnh@example.com', '123', '0120000000', 'Jeddah', 'North Corniche - Blood Bank');
+(1, 'Riyadh Central Hospital', 'rch@example.com', '12345678', '0110000000', 'Riyadh', 'Main Campus - King Fahd Rd'),
+(2, 'Jeddah North Hospital', 'jnh@example.com', '12345678', '0120000000', 'Jeddah', 'North Corniche - Blood Bank'),
+(7, 'King Abdulaziz Hospital', 'kamh@example.com', '12345678', '0111111111', 'Riyadh', 'King Abdulaziz Rd'),
+(8, 'Dammam Medical Center', 'dmc@example.com', '12345678', '0132222222', 'Dammam', 'Corniche - Main Building'),
+(9, 'Medina National Hospital', 'mnh@example.com', '12345678', '0143333333', 'Medina', 'North Area - Health District');
 
 --
 -- Indexes for dumped tables
@@ -172,31 +195,31 @@ ALTER TABLE `hospital`
 -- AUTO_INCREMENT for table `appointment`
 --
 ALTER TABLE `appointment`
-  MODIFY `Appointment_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `Appointment_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=98;
 
 --
 -- AUTO_INCREMENT for table `bloodrequest`
 --
 ALTER TABLE `bloodrequest`
-  MODIFY `Request_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `Request_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `donor`
 --
 ALTER TABLE `donor`
-  MODIFY `Donor_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `Donor_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `eligibilitytest`
 --
 ALTER TABLE `eligibilitytest`
-  MODIFY `Test_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `Test_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT for table `hospital`
 --
 ALTER TABLE `hospital`
-  MODIFY `Hospital_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `Hospital_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- Constraints for dumped tables
@@ -221,5 +244,3 @@ ALTER TABLE `bloodrequest`
 ALTER TABLE `eligibilitytest`
   ADD CONSTRAINT `fk_test_donor` FOREIGN KEY (`Donor_ID`) REFERENCES `donor` (`Donor_ID`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
-
-
