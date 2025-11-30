@@ -1,0 +1,67 @@
+/* ===== Wahib Base Styles ===== */
+:root{
+  --brand:#b91c1c; --brand-600:#a01717; --ink:#111; --muted:#666;
+  --bg:#f7f7f8; --card:#fff; --stroke:#eee; --shadow:0 10px 30px rgba(0,0,0,.06);
+  --radius:14px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:#333;font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+
+/* Header */
+.w-header{position:sticky;top:0;z-index:20;background:var(--brand);color:#fff;
+  display:flex;align-items:center;justify-content:space-between;padding:12px 40px}
+.w-brand{display:flex;align-items:center;gap:10px;cursor:pointer}
+.w-brand img{height:40px;border-radius:10px}
+.w-nav{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.w-link,.w-btn-link{color:#fff;text-decoration:none;font-weight:700;background:none;border:0;cursor:pointer}
+.w-link:hover,.w-btn-link:hover{opacity:.9}
+
+/* Footer (مع رؤيتنا/أهدافنا) */
+.w-footer{margin-top:36px;background:var(--brand);color:#fff;padding:26px 12px}
+.w-footer .grid{max-width:1100px;margin:0 auto;display:grid;gap:18px;grid-template-columns:2fr 1fr}
+@media(max-width:900px){.w-footer .grid{grid-template-columns:1fr}}
+.w-footer h4{margin:0 0 6px}
+.w-footer p,.w-footer li{margin:0;opacity:.95;line-height:1.6}
+.w-footer a{color:#fff;text-decoration:underline}
+.w-footbar{border-top:1px solid rgba(255,255,255,.25);margin-top:14px;padding-top:12px;text-align:center;opacity:.9}
+
+/* Layout */
+.container{max-width:1100px;margin:28px auto;padding:0 20px}
+.panel{background:var(--card);border:1.5px solid var(--stroke);border-radius:var(--radius);
+  padding:20px;box-shadow:var(--shadow)}
+h2{color:var(--brand);margin:0 0 14px}
+
+/* Inputs + Buttons */
+label{font-weight:700;margin:12px 0 6px;display:block}
+input,select,textarea{width:100%;padding:12px;border-radius:12px;border:1px solid #ddd;font:inherit;background:#fff}
+.w-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  background:var(--brand);color:#fff;border:0;border-radius:12px;padding:12px 16px;
+  font-weight:800;cursor:pointer;text-decoration:none}
+.w-btn:hover{background:var(--brand-600)}
+.w-btn.secondary{background:#fff;color:var(--brand);border:1px solid var(--brand)}
+.w-btn.ghost{background:#fafafa;color:var(--brand);border:1px solid #eee}
+
+/* Chips */
+.tag{background:#f5f5f5;padding:5px 10px;border-radius:999px;font-weight:700;font-size:12px;white-space:nowrap}
+.tag.open{background:#e7f6e7;color:#137b13}
+.tag.emg{background:#fdecec;color:var(--brand)}
+
+/* Toast */
+#w-toast{position:fixed;right:20px;bottom:20px;z-index:9999;display:none;
+  background:#111;color:#fff;padding:12px 14px;border-radius:12px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+#w-toast.ok{background:#137b13}
+#w-toast.err{background:#b91c1c}
+
+/* Confirm Modal */
+#w-confirm{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center}
+#w-confirm .box{background:#fff;max-width:420px;width:92%;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.25);padding:22px}
+#w-confirm h3{margin:0 0 12px;color:var(--brand)}
+#w-confirm .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
+
+/* Utility */
+.table{width:100%;border-collapse:separate;border-spacing:0 8px}
+.table th{font-size:12px;color:#888;text-align:left;padding:0 8px}
+.table td{background:#fff;border:1px solid var(--stroke);padding:10px 12px}
+.table td:first-child{border-radius:10px 0 0 10px}
+.table td:last-child{border-radius:0 10px 10px 0}

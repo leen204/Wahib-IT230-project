@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up | Wahib Platform</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body{margin:0;font-family:Poppins,sans-serif}
+    .wrap{max-width:620px;margin:60px auto;background:#fff;border:1px solid #eee;border-radius:16px;box-shadow:0 10px 26px rgba(0,0,0,.08);padding:28px}
+    h2{color:#b91c1c;text-align:center;margin:0 0 18px}
+    label{display:block;font-weight:700;margin:12px 0 6px}
+    input,select{width:100%;padding:10px;border:1px solid #ccc;border-radius:10px;font:inherit}
+    .row{display:grid;gap:12px;grid-template-columns:1fr 1fr}
+    button{width:100%;margin-top:16px;background:#b91c1c;color:#fff;border:0;border-radius:10px;padding:12px;font-weight:800;cursor:pointer}
+    button:hover{background:#921717}
+    .hint{font-size:12px;color:#777;margin-top:4px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h2>Create an Account</h2>
+    <form id="signupForm">
+      <label>Account Type</label>
+      <select id="type" required>
+        <option value="">Select...</option>
+        <option value="donor">Donor</option>
+        <option value="hospital">Hospital</option>
+      </select>
+
+      <label>Email</label>
+      <input id="email" type="email" required>
+
+      <label>Password</label>
+      <input id="password" type="password" placeholder="At least 8 characters" required>
+      <div class="hint">Password must be ≥ 8 characters.</div>
+
+      <!-- Donor-specific fields -->
+      <div id="donorBox" style="display:none">
+        <label>Full Name</label>
+        <input id="dName" type="text" placeholder="Your name">
+
+        <div class="row">
+          <div>
+            <label>Donor ID</label>
+            <input id="dID" type="text" placeholder="Auto or custom ID (e.g., DNR123)">
+          </div>
+          <div>
+            <label>Age</label>
+            <input id="dAge" type="number" min="18" max="70" placeholder="Your age">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Blood Type</label>
+            <select id="dBlood">
+              <option>O+</option><option>O-</option><option>A+</option><option>A-</option>
+              <option>B+</option><option>B-</option><option>AB+</option><option>AB-</option>
+            </select>
+          </div>
+          <div>
+            <label>Phone (10 digits)</label>
+            <input id="dPhone" type="text" placeholder="05XXXXXXXX">
+          </div>
+        </div>
+      </div>
+
+      <!-- Hospital-specific fields -->
+      <div id="hospBox" style="display:none">
+        <label>Hospital Name</label>
+        <input id="hName" type="text" placeholder="e.g., King Khalid Hospital">
+        <div class="row">
+          <div>
+            <label>City / Region</label>
+            <input id="hCity" type="text" placeholder="Riyadh">
+          </div>
+          <div>
+            <label>Contact</label>
+            <input id="hContact" type="text" placeholder="011-0000000">
+          </div>
+        </div>
+      </div>
+
+      <button type="submit">Sign Up</button>
+    </form>
+  </div>
+
+  <script src="app.js"></script>
+  <script src="ui.js"></script>
+  <script src="footer.js"></script>
+
+  <script>
+    const typeSel = document.getElementById('type');
+    const donorBox= document.getElementById('donorBox');
+    const hospBox = document.getElementById('hospBox');
+
+    // toggle donor/hospital fields
+    typeSel.addEventListener('change', ()=>{
+      donorBox.style.display = typeSel.value==='donor' ? 'block' : 'none';
+      hospBox.style.display  = typeSel.value==='hospital' ? 'block' : 'none';
+    });
+
+    // handle submit
+    document.getElementById('signupForm').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const role = typeSel.value;
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      if(role==='hospital'){
+        login({
+          role, email, password,
+          hospitalName: document.getElementById('hName').value.trim(),
+          city: document.getElementById('hCity').value.trim(),
+          contact: document.getElementById('hContact').value.trim()
+        });
+      } else {
+        login({
+          role, email, password,
+          name: document.getElementById('dName').value.trim(),
+          donorID: document.getElementById('dID').value.trim(),
+          age: document.getElementById('dAge').value.trim(),
+          blood: document.getElementById('dBlood').value,
+          phone: document.getElementById('dPhone').value.trim()
+        });
+      }
+    });
+  </script>
+</body>
+</html>
